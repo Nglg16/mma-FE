@@ -1,25 +1,66 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
-import GarageManagerPage from './Pages/GarageManagerPage';
-import MapScreen from './screens/MapScreen';
-import BookingPageManage from './Pages/BookingPageManage/BookingPageManage';
-import ReportPage from './Pages/ReportPage/ReportPage';
-import Schedule from './Pages/SchedulePage/SchedulePage';
-import BillManagementScreen from './Pages/BillManager/BillManagementScreen';
+import { StatusBar } from "expo-status-bar";
+import { StyleSheet, Text, View } from "react-native";
+import { NavigationContainer } from "@react-navigation/native";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { createStackNavigator } from "@react-navigation/stack";
+import { Ionicons } from "@expo/vector-icons";
+import GarageManagerPage from "./Pages/GarageManagerPage";
+import MapScreen from "./screens/MapScreen";
+import BookingPageManage from "./Pages/BookingPageManage/BookingPageManage";
+import ReportPage from "./Pages/ReportPage/ReportPage";
+import Schedule from "./Pages/SchedulePage/SchedulePage";
+import BillManagementScreen from "./Pages/BillManager/BillManagementScreen";
+// Add import for customer booking screen
+import BookingScreen from "./screens/BookingScreen";
 
 const Stack = createStackNavigator();
+const Tab = createBottomTabNavigator();
 
-function HomeScreen({ navigation }) {
+// Stack navigator for Home screens
+function HomeStack() {
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerStyle: { backgroundColor: "#6200ea" },
+        headerTintColor: "#fff",
+      }}
+    >
+      <Stack.Screen
+        name="HomeScreen"
+        component={HomeScreen}
+        options={{ title: "Trang chủ" }}
+      />
+      <Stack.Screen name="Map" component={MapScreen} />
+    </Stack.Navigator>
+  );
+}
+
+// Stack navigator for Garage screens
+function GarageStack() {
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerStyle: { backgroundColor: "#6200ea" },
+        headerTintColor: "#fff",
+      }}
+    >
+      <Stack.Screen
+        name="GarageManager"
+        component={GarageManagerPage}
+        options={{ title: "Quản lý gara" }}
+      />
+      <Stack.Screen name="BookingPageManage" component={BookingPageManage} />
+      <Stack.Screen name="Report" component={ReportPage} />
+      <Stack.Screen name="Schedule" component={Schedule} />
+      <Stack.Screen name="Bill" component={BillManagementScreen} />
+    </Stack.Navigator>
+  );
+}
+
+function HomeScreen() {
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('GarageManage')}>
-        <Text style={styles.buttonText}>GarageManage</Text>
-      </TouchableOpacity>
-            <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Map')}>
-              <Text style={styles.buttonText}>Map</Text>
-            </TouchableOpacity>
+      <Text style={styles.text}>Chào mừng đến với ứng dụng</Text>
       <StatusBar style="auto" />
     </View>
   );
@@ -28,20 +69,70 @@ function HomeScreen({ navigation }) {
 export default function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator
-        screenOptions={{
-          headerStyle: { backgroundColor: '#6200ea' },
-          headerTintColor: '#fff',
-        }}
+      <Tab.Navigator
+        screenOptions={({ route }) => ({
+          tabBarIcon: ({ focused, color, size }) => {
+            let iconName;
+
+            if (route.name === "Home") {
+              iconName = focused ? "home" : "home-outline";
+            } else if (route.name === "Garage") {
+              iconName = focused ? "car" : "car-outline";
+            } else if (route.name === "Map") {
+              iconName = focused ? "map" : "map-outline";
+            } else if (route.name === "Booking") {
+              iconName = focused ? "calendar" : "calendar-outline";
+            }
+
+            return <Ionicons name={iconName} size={size} color={color} />;
+          },
+          tabBarActiveTintColor: "#6200ea",
+          tabBarInactiveTintColor: "#8A94A6",
+          tabBarStyle: {
+            height: 60,
+            paddingBottom: 10,
+            backgroundColor: "#FFFFFF",
+            borderTopWidth: 1,
+            borderTopColor: "#F0F2F5",
+          },
+          headerShown: false,
+        })}
       >
-        <Stack.Screen name="Home" component={HomeScreen} />
-        <Stack.Screen name="GarageManage" component={GarageManagerPage} />
-        <Stack.Screen name="Map" component={MapScreen} />
-        <Stack.Screen name="BookingPageManage" component={BookingPageManage} />
-        <Stack.Screen name="Report" component={ReportPage} />
-        <Stack.Screen name="Schedule" component={Schedule} />
-        <Stack.Screen name="Bill" component={BillManagementScreen} />
-      </Stack.Navigator>
+        <Tab.Screen
+          name="Home"
+          component={HomeStack}
+          options={{
+            title: "Trang chủ",
+          }}
+        />
+        <Tab.Screen
+          name="Booking"
+          component={BookingScreen}
+          options={{
+            title: "Đặt lịch",
+            headerShown: true,
+            headerStyle: { backgroundColor: "#6200ea" },
+            headerTintColor: "#fff",
+          }}
+        />
+        <Tab.Screen
+          name="Garage"
+          component={GarageStack}
+          options={{
+            title: "Gara",
+          }}
+        />
+        <Tab.Screen
+          name="Map"
+          component={MapScreen}
+          options={{
+            title: "Bản đồ",
+            headerShown: true,
+            headerStyle: { backgroundColor: "#6200ea" },
+            headerTintColor: "#fff",
+          }}
+        />
+      </Tab.Navigator>
     </NavigationContainer>
   );
 }
@@ -49,22 +140,26 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#f5f5f5",
+    alignItems: "center",
+    justifyContent: "center",
     padding: 20,
   },
+  text: {
+    fontSize: 18,
+    marginBottom: 20,
+  },
   button: {
-    backgroundColor: '#6200ea',
+    backgroundColor: "#6200ea",
     padding: 15,
     borderRadius: 10,
     marginVertical: 10,
-    width: '80%',
-    alignItems: 'center',
+    width: "80%",
+    alignItems: "center",
   },
   buttonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
 });
