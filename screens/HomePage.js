@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import Header from "../components/Header";
 
 const ServiceCard = ({ icon, title, description }) => (
   <TouchableOpacity style={styles.serviceCard}>
@@ -30,7 +31,6 @@ const PromotionCard = ({ image, title }) => (
 const HomePage = ({ navigation }) => {
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      {/* Hero Section */}
       <View style={styles.heroSection}>
         <Image
           source={{ uri: "https://via.placeholder.com/400x200" }}
