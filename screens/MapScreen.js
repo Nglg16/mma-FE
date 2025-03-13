@@ -2,41 +2,19 @@ import React, { useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Menu, Divider, Provider } from "react-native-paper";
 import { FontAwesome } from "@expo/vector-icons";
+import MapComponent from "../components/MapComponent";
+import Header from "../components/Header";
 
 export default function MapScreen() {
-  const [visible, setVisible] = useState(false);
-
   return (
     <Provider>
       <View style={styles.container}>
         {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.headerText}>Bản đồ</Text>
-
-          {/* Dropdown menu */}
-          <Menu
-            visible={visible}
-            onDismiss={() => setVisible(false)}
-            anchor={
-              <TouchableOpacity onPress={() => setVisible(true)}>
-                <FontAwesome name="user-circle" size={28} color="white" />
-              </TouchableOpacity>
-            }
-            contentStyle={styles.menu}
-          >
-            <Menu.Item
-              onPress={() => alert("Trang cá nhân")}
-              title="Trang cá nhân"
-            />
-            <Menu.Item onPress={() => alert("Cài đặt")} title="Cài đặt" />
-            <Divider />
-            <Menu.Item onPress={() => alert("Đăng xuất")} title="Đăng xuất" />
-          </Menu>
-        </View>
+        <Header title="Bản đồ" />
 
         {/* Nội dung */}
         <View style={styles.content}>
-          <Text style={styles.text}>Nội dung bản đồ</Text>
+          <MapComponent />
         </View>
       </View>
     </Provider>

@@ -12,6 +12,8 @@ import Schedule from "./Pages/SchedulePage/SchedulePage";
 import BillManagementScreen from "./Pages/BillManager/BillManagementScreen";
 // Add import for customer booking screen
 import BookingScreen from "./screens/BookingScreen";
+import Header from "./components/Header";
+import HomePage from "./screens/HomePage";
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -28,9 +30,8 @@ function HomeStack() {
       <Stack.Screen
         name="HomeScreen"
         component={HomeScreen}
-        options={{ title: "Trang chủ" }}
+        options={{ title: "Trang chủ", headerShown: false }}
       />
-      <Stack.Screen name="Map" component={MapScreen} />
     </Stack.Navigator>
   );
 }
@@ -59,10 +60,9 @@ function GarageStack() {
 
 function HomeScreen() {
   return (
-    <View style={styles.container}>
-      <Text style={styles.text}>Chào mừng đến với ứng dụng</Text>
-      <StatusBar style="auto" />
-    </View>
+    <View style={{ flex: 1 }}> 
+    <Header title="Trang chủ" />
+  </View>
   );
 }
 
@@ -103,6 +103,7 @@ export default function App() {
           component={HomeStack}
           options={{
             title: "Trang chủ",
+            headerShown: false,
           }}
         />
         <Tab.Screen
@@ -110,7 +111,7 @@ export default function App() {
           component={BookingScreen}
           options={{
             title: "Đặt lịch",
-            headerShown: true,
+
             headerStyle: { backgroundColor: "#6200ea" },
             headerTintColor: "#fff",
           }}
@@ -127,39 +128,13 @@ export default function App() {
           component={MapScreen}
           options={{
             title: "Bản đồ",
-            headerShown: true,
+
             headerStyle: { backgroundColor: "#6200ea" },
             headerTintColor: "#fff",
+            headerShown: false,
           }}
         />
       </Tab.Navigator>
     </NavigationContainer>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#f5f5f5",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 20,
-  },
-  text: {
-    fontSize: 18,
-    marginBottom: 20,
-  },
-  button: {
-    backgroundColor: "#6200ea",
-    padding: 15,
-    borderRadius: 10,
-    marginVertical: 10,
-    width: "80%",
-    alignItems: "center",
-  },
-  buttonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-});
