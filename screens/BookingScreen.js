@@ -1,5 +1,4 @@
-// screens/BookingScreen.js
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -8,20 +7,27 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
+  Image,
+  ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import * as Location from "expo-location";
 
 const BookingScreen = () => {
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
-  const [service, setService] = useState("");
+  const [selectedServices, setSelectedServices] = useState([]); // Changed from string to array
   const [date, setDate] = useState(new Date());
   const [time, setTime] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [nearbyGarages, setNearbyGarages] = useState([]);
+  const [selectedGarage, setSelectedGarage] = useState(null);
+  const [loadingGarages, setLoadingGarages] = useState(false);
+  const [userLocation, setUserLocation] = useState(null);
 
   const services = [
     "Bảo dưỡng định kỳ",
@@ -31,6 +37,135 @@ const BookingScreen = () => {
     "Đồng sơn",
     "Nâng cấp phụ kiện",
   ];
+
+  // Hàm lấy vị trí hiện tại của người dùng
+  const getUserLocation = async () => {
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert(
+          "Thông báo",
+          "Bạn cần cấp quyền truy cập vị trí để tìm gara gần đây."
+        );
+        return;
+      }
+
+      const location = await Location.getCurrentPositionAsync({});
+      setUserLocation({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+      });
+      return location.coords;
+    } catch (error) {
+      console.error("Error getting location:", error);
+      Alert.alert(
+        "Lỗi",
+        "Không thể lấy vị trí hiện tại. Vui lòng thử lại sau!"
+      );
+      return null;
+    }
+  };
+
+  // Hàm lấy danh sách gara gần đây
+  const fetchNearbyGarages = async (coords = null) => {
+    try {
+      setLoadingGarages(true);
+
+      let latitude, longitude;
+
+      if (coords) {
+        latitude = coords.latitude;
+        longitude = coords.longitude;
+      } else if (userLocation) {
+        latitude = userLocation.latitude;
+        longitude = userLocation.longitude;
+      } else {
+        // Sử dụng tọa độ mặc định nếu không có vị trí người dùng
+        latitude = 21.028511;
+        longitude = 105.804817;
+      }
+
+      // Thay đổi URL từ localhost thành IP của máy bạn hoặc URL server thật
+      // Lưu ý: localhost trên thiết bị di động sẽ không trỏ đến máy tính của bạn
+      const response = await fetch(
+        `http://192.168.137.1:8017/garages?lat=${latitude}&lon=${longitude}`
+      );
+
+      if (!response.ok) {
+        throw new Error(`Server responded with status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log("Fetched garages data:", data); // Log để kiểm tra dữ liệu
+
+      // Kiểm tra để đảm bảo data là một mảng
+      if (Array.isArray(data)) {
+        // Đảm bảo mỗi gara có một ID duy nhất
+        const garagesWithIds = data.map((garage, index) => ({
+          ...garage,
+          id: garage.id || `garage-${index}`, // Sử dụng ID hiện có hoặc tạo mới
+        }));
+        setNearbyGarages(garagesWithIds);
+      } else if (data && typeof data === "object") {
+        // Nếu data là một object có property là mảng garages
+        if (Array.isArray(data.garages)) {
+          const garagesWithIds = data.garages.map((garage, index) => ({
+            ...garage,
+            id: garage.id || `garage-${index}`,
+          }));
+          setNearbyGarages(garagesWithIds);
+        } else if (data.data && Array.isArray(data.data)) {
+          // Trường hợp API trả về dữ liệu trong property data
+          const garagesWithIds = data.data.map((garage, index) => ({
+            ...garage,
+            id: garage.id || `garage-${index}`,
+          }));
+          setNearbyGarages(garagesWithIds);
+        } else {
+          // Nếu không tìm thấy mảng, tạo một mảng từ các thuộc tính của object
+          console.warn(
+            "API response is not an array. Converting to array:",
+            data
+          );
+          const garagesArray = Object.values(data).filter(
+            (item) => typeof item === "object"
+          );
+          const garagesWithIds = garagesArray.map((garage, index) => ({
+            ...garage,
+            id: garage.id || `garage-${index}`,
+          }));
+          setNearbyGarages(garagesWithIds.length > 0 ? garagesWithIds : []);
+        }
+      } else {
+        console.error("API did not return valid garage data:", data);
+        setNearbyGarages([]);
+      }
+
+      setLoadingGarages(false);
+    } catch (error) {
+      console.error("Error fetching nearby garages:", error);
+      setNearbyGarages([]);
+      setLoadingGarages(false);
+      Alert.alert(
+        "Lỗi",
+        "Không thể lấy danh sách gara gần đây. Vui lòng thử lại sau!"
+      );
+    }
+  };
+
+  // Lấy vị trí và danh sách gara khi component được mount
+  useEffect(() => {
+    const initLocation = async () => {
+      const coords = await getUserLocation();
+      if (coords) {
+        fetchNearbyGarages(coords);
+      } else {
+        fetchNearbyGarages();
+      }
+    };
+
+    initLocation();
+  }, []);
 
   const onDateChange = (event, selectedDate) => {
     const currentDate = selectedDate || date;
@@ -57,9 +192,30 @@ const BookingScreen = () => {
     return `${hours}:${minutes < 10 ? "0" + minutes : minutes}`;
   };
 
+  // Hàm để toggle dịch vụ (chọn hoặc bỏ chọn)
+  const toggleService = (service) => {
+    setSelectedServices((prevServices) => {
+      if (prevServices.includes(service)) {
+        // Nếu dịch vụ đã được chọn, bỏ chọn nó
+        return prevServices.filter((s) => s !== service);
+      } else {
+        // Nếu dịch vụ chưa được chọn, thêm vào danh sách
+        return [...prevServices, service];
+      }
+    });
+  };
+
   const handleCreateBooking = async () => {
-    if (!customerName || !customerPhone || !service) {
-      Alert.alert("Thông báo", "Vui lòng điền đầy đủ thông tin bắt buộc!");
+    if (
+      !customerName ||
+      !customerPhone ||
+      selectedServices.length === 0 ||
+      !selectedGarage
+    ) {
+      Alert.alert(
+        "Thông báo",
+        "Vui lòng điền đầy đủ thông tin bắt buộc, chọn ít nhất một dịch vụ và chọn gara!"
+      );
       return;
     }
 
@@ -79,24 +235,31 @@ const BookingScreen = () => {
         hours + 1
       }:${formattedMinutes}`;
 
-      // Chuyển service từ string thành array (mảng chỉ có 1 phần tử)
-      const serviceArray = [service];
+      // Đảm bảo selectedGarage có ID hợp lệ
+      if (!selectedGarage || !selectedGarage.id) {
+        Alert.alert("Thông báo", "Vui lòng chọn một gara hợp lệ!");
+        setLoading(false);
+        return;
+      }
 
       const bookingData = {
         customerName,
         customerPhone,
         customerEmail,
-        service: serviceArray, // Đổi từ string sang array
+        service: selectedServices,
         bookingDate: {
           date: formattedDate,
           timeSlot: timeSlot,
         },
-        cancelReason: "", // Thêm trường này theo yêu cầu BE
+        cancelReason: "",
+        garageId: selectedGarage._id, // ID của gara đã chọn
       };
+      // console.log("check nearbyGarages", nearbyGarages);
 
-      console.log("Booking data:", bookingData);
+      // // console.log("Booking data:", bookingData);
+      // console.log("Selected garage ID:", selectedGarage);
 
-      const response = await fetch("http://192.168.0.102:8017/booking", {
+      const response = await fetch("http://192.168.137.1:8017/booking", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -127,9 +290,10 @@ const BookingScreen = () => {
               setCustomerName("");
               setCustomerPhone("");
               setCustomerEmail("");
-              setService("");
+              setSelectedServices([]);
               setDate(new Date());
               setTime(new Date());
+              setSelectedGarage(null);
             },
           },
         ]
@@ -142,6 +306,20 @@ const BookingScreen = () => {
         `Đã xảy ra lỗi khi đặt lịch: ${error.message}. Vui lòng thử lại sau!`
       );
     }
+  };
+
+  // Hiển thị khoảng cách
+  const formatDistance = (distance) => {
+    if (distance < 1) {
+      return `${(distance * 1000).toFixed(0)} m`;
+    }
+    return `${distance.toFixed(1)} km`;
+  };
+
+  // Làm mới danh sách gara
+  const refreshGarages = async () => {
+    const coords = await getUserLocation();
+    fetchNearbyGarages(coords);
   };
 
   return (
@@ -218,28 +396,154 @@ const BookingScreen = () => {
           <View style={styles.stepCircle}>
             <Text style={styles.stepNumber}>2</Text>
           </View>
+          <Text style={styles.stepTitle}>Chọn gara gần đây</Text>
+        </View>
+
+        <View style={styles.garageRefreshContainer}>
+          <Text style={styles.label}>
+            Chọn gara <Text style={styles.required}>*</Text>
+          </Text>
+          <TouchableOpacity
+            style={styles.refreshButton}
+            onPress={refreshGarages}
+          >
+            <Ionicons name="refresh-outline" size={18} color="#FF6B6B" />
+            <Text style={styles.refreshText}>Làm mới</Text>
+          </TouchableOpacity>
+        </View>
+
+        {loadingGarages ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#FF6B6B" />
+            <Text style={styles.loadingText}>Đang tìm gara gần đây...</Text>
+          </View>
+        ) : nearbyGarages.length === 0 ? (
+          <View style={styles.noGaragesContainer}>
+            <Ionicons name="alert-circle-outline" size={40} color="#FF6B6B" />
+            <Text style={styles.noGaragesText}>
+              Không tìm thấy gara nào gần đây!
+            </Text>
+            <TouchableOpacity
+              style={styles.retryButton}
+              onPress={refreshGarages}
+            >
+              <Text style={styles.retryButtonText}>Thử lại</Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <View style={styles.garagesContainer}>
+            {nearbyGarages.map((garage, index) => (
+              <TouchableOpacity
+                key={garage.id || index}
+                style={[
+                  styles.garageItem,
+                  selectedGarage &&
+                    selectedGarage.id === garage.id &&
+                    styles.garageItemSelected,
+                ]}
+                onPress={() => {
+                  // Chỉ chọn một gara duy nhất
+                  setSelectedGarage(garage);
+                  console.log("Selected garage:", garage.id);
+                }}
+              >
+                <View style={styles.garageInfoContainer}>
+                  <View style={styles.garageImageContainer}>
+                    {garage.image ? (
+                      <Image
+                        source={{ uri: garage.image }}
+                        style={styles.garageImage}
+                        resizeMode="cover"
+                      />
+                    ) : (
+                      <View style={styles.garageImagePlaceholder}>
+                        <Ionicons
+                          name="car-outline"
+                          size={24}
+                          color="#8A94A6"
+                        />
+                      </View>
+                    )}
+                  </View>
+                  <View style={styles.garageDetails}>
+                    <Text style={styles.garageName}>
+                      {garage.name || "Gara không tên"}
+                    </Text>
+                    <View style={styles.garageAddressRow}>
+                      <Ionicons
+                        name="location-outline"
+                        size={14}
+                        color="#8A94A6"
+                      />
+                      <Text style={styles.garageAddress} numberOfLines={2}>
+                        {garage.address || "Không có địa chỉ"}
+                      </Text>
+                    </View>
+                    {garage.distance !== undefined && (
+                      <View style={styles.garageDistanceRow}>
+                        <Ionicons
+                          name="navigate-outline"
+                          size={14}
+                          color="#8A94A6"
+                        />
+                        <Text style={styles.garageDistance}>
+                          {formatDistance(garage.distance)}
+                        </Text>
+                      </View>
+                    )}
+                    <View style={styles.garageRatingRow}>
+                      <Ionicons name="star" size={14} color="#FFD700" />
+                      <Text style={styles.garageRating}>
+                        {garage.rating || "N/A"}{" "}
+                        {garage.ratingCount && `(${garage.ratingCount})`}
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+                {selectedGarage && selectedGarage.id === garage.id && (
+                  <Ionicons
+                    name="checkmark-circle"
+                    size={24}
+                    color="#FF6B6B"
+                    style={styles.garageSelectedIcon}
+                  />
+                )}
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
+
+        <View style={styles.stepIndicator}>
+          <View style={styles.stepCircle}>
+            <Text style={styles.stepNumber}>3</Text>
+          </View>
           <Text style={styles.stepTitle}>Chọn dịch vụ</Text>
         </View>
 
         <View style={styles.servicesContainer}>
+          <Text style={styles.label}>
+            Chọn dịch vụ <Text style={styles.required}>*</Text>
+            <Text style={styles.serviceHelper}> (Có thể chọn nhiều)</Text>
+          </Text>
           {services.map((item, index) => (
             <TouchableOpacity
               key={index}
               style={[
                 styles.serviceOption,
-                service === item && styles.serviceOptionSelected,
+                selectedServices.includes(item) && styles.serviceOptionSelected,
               ]}
-              onPress={() => setService(item)}
+              onPress={() => toggleService(item)}
             >
               <Text
                 style={[
                   styles.serviceOptionText,
-                  service === item && styles.serviceOptionTextSelected,
+                  selectedServices.includes(item) &&
+                    styles.serviceOptionTextSelected,
                 ]}
               >
                 {item}
               </Text>
-              {service === item && (
+              {selectedServices.includes(item) && (
                 <Ionicons name="checkmark-circle" size={20} color="#FF6B6B" />
               )}
             </TouchableOpacity>
@@ -248,7 +552,7 @@ const BookingScreen = () => {
 
         <View style={styles.stepIndicator}>
           <View style={styles.stepCircle}>
-            <Text style={styles.stepNumber}>3</Text>
+            <Text style={styles.stepNumber}>4</Text>
           </View>
           <Text style={styles.stepTitle}>Chọn thời gian</Text>
         </View>
@@ -373,6 +677,11 @@ const styles = StyleSheet.create({
   required: {
     color: "#FF6B6B",
   },
+  serviceHelper: {
+    fontSize: 12,
+    fontStyle: "italic",
+    color: "#8A94A6",
+  },
   inputContainer: {
     flexDirection: "row",
     alignItems: "center",
@@ -390,6 +699,145 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#4A4A4A",
   },
+  // Styles cho danh sách gara
+  garageRefreshContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  refreshButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 8,
+  },
+  refreshText: {
+    color: "#FF6B6B",
+    marginLeft: 4,
+    fontSize: 14,
+  },
+  loadingContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 24,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 8,
+    marginBottom: 16,
+  },
+  loadingText: {
+    marginTop: 12,
+    color: "#4A4A4A",
+    fontSize: 14,
+  },
+  noGaragesContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 24,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 8,
+    marginBottom: 16,
+  },
+  noGaragesText: {
+    marginTop: 12,
+    marginBottom: 16,
+    color: "#4A4A4A",
+    fontSize: 14,
+    textAlign: "center",
+  },
+  retryButton: {
+    backgroundColor: "#FF6B6B",
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 4,
+  },
+  retryButtonText: {
+    color: "#FFFFFF",
+    fontWeight: "600",
+  },
+  garagesContainer: {
+    marginBottom: 16,
+  },
+  garageItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "#FFFFFF",
+    borderRadius: 8,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: "#E0E4EC",
+    padding: 12,
+  },
+  garageItemSelected: {
+    borderColor: "#FF6B6B",
+    backgroundColor: "#FFF0F0",
+  },
+  garageInfoContainer: {
+    flexDirection: "row",
+    flex: 1,
+  },
+  garageImageContainer: {
+    width: 70,
+    height: 70,
+    borderRadius: 8,
+    overflow: "hidden",
+    marginRight: 12,
+  },
+  garageImage: {
+    width: "100%",
+    height: "100%",
+  },
+  garageImagePlaceholder: {
+    width: "100%",
+    height: "100%",
+    backgroundColor: "#E0E4EC",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  garageDetails: {
+    flex: 1,
+    justifyContent: "space-between",
+  },
+  garageName: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#4A4A4A",
+    marginBottom: 4,
+  },
+  garageAddressRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    marginBottom: 4,
+  },
+  garageAddress: {
+    fontSize: 12,
+    color: "#8A94A6",
+    marginLeft: 4,
+    flex: 1,
+  },
+  garageDistanceRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 4,
+  },
+  garageDistance: {
+    fontSize: 12,
+    color: "#8A94A6",
+    marginLeft: 4,
+  },
+  garageRatingRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  garageRating: {
+    fontSize: 12,
+    color: "#8A94A6",
+    marginLeft: 4,
+  },
+  garageSelectedIcon: {
+    marginLeft: 8,
+  },
+  // Styles hiện có
   servicesContainer: {
     marginBottom: 16,
   },
