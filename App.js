@@ -14,6 +14,7 @@ import BillManagementScreen from "./Pages/BillManager/BillManagementScreen";
 import BookingScreen from "./screens/BookingScreen";
 import Header from "./components/Header";
 import HomePage from "./screens/HomePage";
+// import AppHeader from "./components/AppHeader";
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -58,11 +59,12 @@ function GarageStack() {
   );
 }
 
-function HomeScreen() {
+function HomeScreen({ navigation }) {
   return (
-    <View style={{ flex: 1 }}> 
-    <Header title="Trang chủ" />
-  </View>
+    <View style={{ flex: 1 }}>
+      {/* <Header title="Trang chủ" /> */}
+      <HomePage navigation={navigation} />
+    </View>
   );
 }
 
