@@ -37,7 +37,6 @@ const BillItem = ({ bill }) => {
         </View>
       </View>
 
-      {/* Bill Details (Collapsible) */}
       <Collapsible collapsed={!isExpanded}>
         <View style={styles.billDetails}>
           <View style={styles.detailRow}>
