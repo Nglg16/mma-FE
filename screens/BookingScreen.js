@@ -30,12 +30,14 @@ const BookingScreen = () => {
   const [userLocation, setUserLocation] = useState(null);
 
   const services = [
-    "Bảo dưỡng định kỳ",
-    "Thay dầu, lọc gió",
-    "Sửa chữa động cơ",
-    "Sửa chữa hệ thống điện",
-    "Đồng sơn",
-    "Nâng cấp phụ kiện",
+    "Rửa xe",
+    "Thay dầu máy",
+    "Thay dầu phanh",
+    "Cân chỉnh thước lái",
+    "Thay lốp",
+    "Bảo dưỡng hệ thống lạnh",
+    "Sửa chữa hộp số",
+    "Kiểm tra tổng quát",
   ];
 
   // Hàm lấy vị trí hiện tại của người dùng
