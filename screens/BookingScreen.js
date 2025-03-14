@@ -88,7 +88,7 @@ const BookingScreen = () => {
       // Thay đổi URL từ localhost thành IP của máy bạn hoặc URL server thật
       // Lưu ý: localhost trên thiết bị di động sẽ không trỏ đến máy tính của bạn
       const response = await fetch(
-        `http://10.33.35.112:8003/garages?lat=${latitude}&lon=${longitude}`
+        `http://192.168.0.103:8003/garages?lat=${latitude}&lon=${longitude}`
       );
 
       if (!response.ok) {
@@ -259,7 +259,7 @@ const BookingScreen = () => {
       // // console.log("Booking data:", bookingData);
       // console.log("Selected garage ID:", selectedGarage);
 
-      const response = await fetch("http://10.33.35.112:8003/booking", {
+      const response = await fetch("http://192.168.0.103:8003/booking", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
