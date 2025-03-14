@@ -295,6 +295,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
+    marginRight:20
   },
   quantityButton: {
     backgroundColor: "#f0f0f0",
@@ -315,10 +316,11 @@ const styles = StyleSheet.create({
   },
   serviceTotal: {
     flex: 1,
-    flexDirection: "row",
-    justifyContent: "flex-end",
-    alignItems: "center",
+    flexDirection: "column", // Đưa số tiền xuống dòng dưới
+    alignItems: "flex-end", // Căn lề phải cho đẹp
+    marginTop: 5, // Thêm khoảng cách với số lượng
   },
+  
   serviceTotalText: {
     fontSize: 15,
     fontWeight: "600",

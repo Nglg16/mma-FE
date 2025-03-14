@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, ScrollView , ActivityIndicator} from 'react-native';
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator, StatusBar } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import FilterCard from './FilterCard';
 import StatisticCards from './StatisticCards';
@@ -14,10 +14,12 @@ const ReportPage = () => {
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState(null);
   const [viewMode, setViewMode] = useState('day');
-  const garageId = "65dbe7f2f1a2c8b4e9e4d1a1";
+  const [error, setError] = useState(null);
+  const garageId = "65a4c1e2f4d2b41234abcd10";
 
   const fetchData = useCallback(async () => {
     setLoading(true);
+    setError(null);
     try {
       let response;
       if (viewMode === 'day' && date) {
@@ -30,6 +32,7 @@ const ReportPage = () => {
       setData(response);
     } catch (error) {
       console.error('Error fetching statistics:', error);
+      setError('Không thể tải dữ liệu. Vui lòng thử lại sau.');
     } finally {
       setLoading(false);
     }
@@ -45,7 +48,11 @@ const ReportPage = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
+      <StatusBar barStyle="dark-content" backgroundColor="#f5f5f5" />
+      <ScrollView 
+        contentContainerStyle={styles.scrollContainer}
+        showsVerticalScrollIndicator={false}
+      >
         <Header />
         
         <FilterCard 
@@ -64,7 +71,11 @@ const ReportPage = () => {
         {loading ? (
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color="#0066cc" />
-            <Text style={styles.loadingText}>Đang tải...</Text>
+            <Text style={styles.loadingText}>Đang tải dữ liệu...</Text>
+          </View>
+        ) : error ? (
+          <View style={styles.errorContainer}>
+            <Text style={styles.errorText}>{error}</Text>
           </View>
         ) : (
           data && (
@@ -78,6 +89,7 @@ const ReportPage = () => {
               <ChartCard 
                 totalCustomers={data.totalCustomers || 0}
                 totalRevenue={data.totalRevenue || 0}
+                formatCurrency={formatCurrency}
               />
             </View>
           )
@@ -90,24 +102,44 @@ const ReportPage = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#f8f9fa',
   },
   scrollContainer: {
     padding: 16,
+    paddingBottom: 24,
   },
   contentContainer: {
     marginTop: 16,
   },
   loadingContainer: {
-    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 50,
+    paddingVertical: 50,
   },
   loadingText: {
-    marginTop: 10,
+    marginTop: 12,
     color: '#0066cc',
     fontSize: 16,
+    fontWeight: '500',
+  },
+  errorContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 50,
+    backgroundColor: '#fff',
+    marginTop: 16,
+    borderRadius: 8,
+    padding: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  errorText: {
+    color: '#dc3545',
+    fontSize: 16,
+    textAlign: 'center',
   }
 });
 

@@ -9,11 +9,13 @@ import MapScreen from "./screens/MapScreen";
 import BookingPageManage from "./Pages/BookingPageManage/BookingPageManage";
 import ReportPage from "./Pages/ReportPage/ReportPage";
 import Schedule from "./Pages/SchedulePage/SchedulePage";
+import ServiceManager from "./Pages/ServicePage/ServiceManager";
 import BillManagementScreen from "./Pages/BillManager/BillManagementScreen";
 // Add import for customer booking screen
 import BookingScreen from "./screens/BookingScreen";
 import Header from "./components/Header";
 import HomePage from "./screens/HomePage";
+
 // import AppHeader from "./components/AppHeader";
 
 const Stack = createStackNavigator();
@@ -49,11 +51,11 @@ function GarageStack() {
       <Stack.Screen
         name="GarageManager"
         component={GarageManagerPage}
-        options={{ title: "Quản lý gara" }}
+        options={{ title: "Quản lý gara" , headerShown: false}}
       />
-      <Stack.Screen name="BookingPageManage" component={BookingPageManage} />
-      <Stack.Screen name="Report" component={ReportPage} />
-      <Stack.Screen name="Schedule" component={Schedule} />
+      <Stack.Screen name="BookingPageManage" component={BookingPageManage}  options={{ title: "Quản lý lịch hẹn" }}/>
+      <Stack.Screen name="Report" component={ReportPage}  options={{ title: "Báo cáo thống kê"}}/>
+      <Stack.Screen name="Service" component={ServiceManager} />
       <Stack.Screen name="Bill" component={BillManagementScreen} />
     </Stack.Navigator>
   );
