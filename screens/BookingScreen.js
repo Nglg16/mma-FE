@@ -13,12 +13,13 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import * as Location from "expo-location";
-
+import { API_ROOT } from "../utilities/constants";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 const BookingScreen = () => {
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
-  const [selectedServices, setSelectedServices] = useState([]); // Changed from string to array
+  const [selectedServices, setSelectedServices] = useState([]);
   const [date, setDate] = useState(new Date());
   const [time, setTime] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -28,6 +29,7 @@ const BookingScreen = () => {
   const [selectedGarage, setSelectedGarage] = useState(null);
   const [loadingGarages, setLoadingGarages] = useState(false);
   const [userLocation, setUserLocation] = useState(null);
+  const [userData, setUserData] = useState(null);
 
   const services = [
     "Rửa xe",
@@ -39,6 +41,30 @@ const BookingScreen = () => {
     "Sửa chữa hộp số",
     "Kiểm tra tổng quát",
   ];
+
+  // Get user data from AsyncStorage when component mounts
+  useEffect(() => {
+    const getUserData = async () => {
+      try {
+        const userDataString = await AsyncStorage.getItem("userData");
+        if (userDataString) {
+          const parsedUserData = JSON.parse(userDataString);
+
+          // Set user information from AsyncStorage to state
+          if (parsedUserData.fullName) setCustomerName(parsedUserData.fullName);
+          if (parsedUserData.phone) setCustomerPhone(parsedUserData.phone);
+          if (parsedUserData.email) setCustomerEmail(parsedUserData.email);
+
+          // Save the full userData for potential future use
+          setUserData(parsedUserData);
+        }
+      } catch (error) {
+        console.error("Error retrieving user data from AsyncStorage:", error);
+      }
+    };
+
+    getUserData();
+  }, []);
 
   // Hàm lấy vị trí hiện tại của người dùng
   const getUserLocation = async () => {
@@ -90,7 +116,7 @@ const BookingScreen = () => {
       // Thay đổi URL từ localhost thành IP của máy bạn hoặc URL server thật
       // Lưu ý: localhost trên thiết bị di động sẽ không trỏ đến máy tính của bạn
       const response = await fetch(
-        `http://192.168.0.103:8003/garages?lat=${latitude}&lon=${longitude}`
+        `${API_ROOT}/garages?lat=${latitude}&lon=${longitude}`
       );
 
       if (!response.ok) {
@@ -256,18 +282,20 @@ const BookingScreen = () => {
         cancelReason: "",
         garageId: selectedGarage._id, // ID của gara đã chọn
       };
-      // console.log("check nearbyGarages", nearbyGarages);
 
-      // // console.log("Booking data:", bookingData);
-      // console.log("Selected garage ID:", selectedGarage);
+      // Add userId from userData if available
+      if (userData && userData.userId) {
+        bookingData.userId = userData.userId;
+      }
 
-      const response = await fetch("http://192.168.0.103:8003/booking", {
+      const response = await fetch(`${API_ROOT}/booking`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(bookingData),
       });
+      console.log("With booking data:", JSON.stringify(bookingData));
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -288,10 +316,7 @@ const BookingScreen = () => {
           {
             text: "OK",
             onPress: () => {
-              // Reset form
-              setCustomerName("");
-              setCustomerPhone("");
-              setCustomerEmail("");
+              // Reset form but keep customer info
               setSelectedServices([]);
               setDate(new Date());
               setTime(new Date());
@@ -350,6 +375,7 @@ const BookingScreen = () => {
               placeholder="Nhập họ và tên"
               value={customerName}
               onChangeText={setCustomerName}
+              editable={!userData} // Make field non-editable if userData exists
             />
           </View>
         </View>
@@ -371,6 +397,7 @@ const BookingScreen = () => {
               keyboardType="phone-pad"
               value={customerPhone}
               onChangeText={setCustomerPhone}
+              editable={!userData} // Make field non-editable if userData exists
             />
           </View>
         </View>
@@ -390,6 +417,7 @@ const BookingScreen = () => {
               keyboardType="email-address"
               value={customerEmail}
               onChangeText={setCustomerEmail}
+              editable={!userData} // Make field non-editable if userData exists
             />
           </View>
         </View>
