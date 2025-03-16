@@ -1,4 +1,3 @@
-import { StatusBar } from "expo-status-bar";
 import { StyleSheet, Text, View, ActivityIndicator } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
@@ -8,12 +7,10 @@ import GarageManagerPage from "./Pages/GarageManagerPage";
 import MapScreen from "./screens/MapScreen";
 import BookingPageManage from "./Pages/BookingPageManage/BookingPageManage";
 import ReportPage from "./Pages/ReportPage/ReportPage";
-import Schedule from "./Pages/SchedulePage/SchedulePage";
 import ServiceManager from "./Pages/ServicePage/ServiceManager";
 import BillManagementScreen from "./Pages/BillManager/BillManagementScreen";
 // Add import for customer booking screen
 import BookingScreen from "./screens/BookingScreen";
-import Header from "./components/Header";
 import HomePage from "./screens/HomePage";
 import LoginScreen from "./Pages/Login/login";
 import RegisterForm from "./Pages/Register/register";
@@ -44,6 +41,11 @@ function HomeStack() {
         name="HomeScreen"
         component={HomeScreen}
         options={{ title: "Trang chủ", headerShown: false }}
+      />
+      <Stack.Screen
+        name="RegisterForm"
+        component={RegisterForm}
+        options={{ title: "Đăng Ký Garage" }}
       />
     </Stack.Navigator>
   );
@@ -132,7 +134,7 @@ export default function App() {
     const getUserData = async () => {
       try {
         const userData = await AsyncStorage.getItem("userData");
-        console.log("check role", userRole);
+        console.log("check role", userData);
         if (userData) {
           const parsedUserData = JSON.parse(userData);
           setUserRole(parsedUserData.role);

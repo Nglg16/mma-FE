@@ -119,7 +119,7 @@ const LoginForm = ({ navigation: propNavigation }) => {
     setUserData(null);
     Alert.alert("Đăng xuất", "Bạn đã đăng xuất thành công!");
   };
-  const navigateBookingHis = () => {};
+
   return (
     <ImageBackground
       source={{

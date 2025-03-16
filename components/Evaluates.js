@@ -10,7 +10,6 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { API_ROOT } from "../utilities/constants"; // Đảm bảo rằng bạn đã định nghĩa API_ROOT
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const EvaluateForm = () => {
   const [form, setForm] = useState({
@@ -20,21 +19,7 @@ const EvaluateForm = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    const checkToken = async () => {
-      try {
-        const token = await AsyncStorage.getItem("userToken");
-        const storedUserData = await AsyncStorage.getItem("userData");
 
-        console.log("Token từ AsyncStorage:", token);
-        console.log("Dữ liệu từ AsyncStorage:", storedUserData);
-      } catch (error) {
-        console.error("Lỗi lấy dữ liệu từ AsyncStorage:", error);
-      }
-    };
-
-    checkToken();
-  }, []);
 
   const handleRatingPress = (rating) => {
     setForm({ ...form, rating });

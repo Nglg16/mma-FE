@@ -122,13 +122,13 @@ const BookingScreen = () => {
       const response = await fetch(
         `${API_ROOT}/garages?lat=${latitude}&lon=${longitude}`
       );
+      console.log(latitude, longitude);
 
       if (!response.ok) {
         throw new Error(`Server responded with status: ${response.status}`);
       }
 
       const data = await response.json();
-      console.log("Fetched garages data:", data); // Log để kiểm tra dữ liệu
 
       // Kiểm tra để đảm bảo data là một mảng
       if (Array.isArray(data)) {
