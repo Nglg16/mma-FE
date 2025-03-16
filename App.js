@@ -1,5 +1,5 @@
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View, ActivityIndicator } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createStackNavigator } from "@react-navigation/stack";
@@ -19,6 +19,9 @@ import LoginScreen from "./Pages/Login/login";
 import RegisterForm from "./Pages/Register/register";
 import Icon from "react-native-vector-icons/FontAwesome";
 import Evaluate from "./components/Evaluates";
+
+import React, { useState, useEffect } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // import AppHeader from "./components/AppHeader";
 
@@ -75,6 +78,7 @@ function GarageStack() {
     </Stack.Navigator>
   );
 }
+
 function BookingHistoryScreen() {
   return (
     <Stack.Navigator
@@ -120,6 +124,38 @@ function AuthStack() {
 }
 
 export default function App() {
+  const [isLoading, setIsLoading] = useState(true);
+  const [userRole, setUserRole] = useState(null);
+
+  useEffect(() => {
+    // Lấy thông tin người dùng từ AsyncStorage khi component mount
+    const getUserData = async () => {
+      try {
+        const userData = await AsyncStorage.getItem("userData");
+        console.log("check role", userRole);
+        if (userData) {
+          const parsedUserData = JSON.parse(userData);
+          setUserRole(parsedUserData.role);
+        }
+      } catch (error) {
+        console.error("Lỗi khi lấy dữ liệu người dùng:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    getUserData();
+  }, []);
+
+  // Hiển thị loading khi đang lấy dữ liệu
+  if (isLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color="#6200ea" />
+      </View>
+    );
+  }
+
   return (
     <NavigationContainer>
       <Tab.Navigator
@@ -159,33 +195,46 @@ export default function App() {
             headerShown: false,
           }}
         />
-        <Tab.Screen
-          name="Booking"
-          component={BookingScreen}
-          options={{
-            title: "Đặt lịch",
-            headerStyle: { backgroundColor: "#6200ea" },
-            headerTintColor: "#fff",
-          }}
-        />
-        <Tab.Screen
-          name="Garage"
-          component={GarageStack}
-          options={{
-            title: "Gara",
-          }}
-        />
-        <Tab.Screen
-          name="Danhgia"
-          component={Evaluate}
-          options={{
-            title: "Đánh giá",
-            headerShown: false,
-            tabBarIcon: ({ color, size }) => (
-              <Icon name="comment" size={size} color={color} />
-            ),
-          }}
-        />
+
+        {/* Chỉ hiển thị tab Đặt lịch khi không phải admin */}
+        {userRole !== "admin" && (
+          <Tab.Screen
+            name="Booking"
+            component={BookingScreen}
+            options={{
+              title: "Đặt lịch",
+              headerStyle: { backgroundColor: "#6200ea" },
+              headerTintColor: "#fff",
+            }}
+          />
+        )}
+
+        {/* Chỉ hiển thị tab Garage khi là admin */}
+        {userRole === "admin" && (
+          <Tab.Screen
+            name="Garage"
+            component={GarageStack}
+            options={{
+              title: "Gara",
+            }}
+          />
+        )}
+
+        {/* Chỉ hiển thị tab Đánh giá khi không phải admin */}
+        {userRole !== "admin" && (
+          <Tab.Screen
+            name="Danhgia"
+            component={Evaluate}
+            options={{
+              title: "Đánh giá",
+              headerShown: false,
+              tabBarIcon: ({ color, size }) => (
+                <Icon name="comment" size={size} color={color} />
+              ),
+            }}
+          />
+        )}
+
         <Tab.Screen
           name="Map"
           component={MapScreen}
@@ -196,6 +245,7 @@ export default function App() {
             headerShown: false,
           }}
         />
+
         <Tab.Screen
           name="Auth"
           component={AuthStack}
