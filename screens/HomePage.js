@@ -9,6 +9,8 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
+
 import Header from "../components/Header";
 
 const ServiceCard = ({ icon, title, description }) => (

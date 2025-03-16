@@ -79,6 +79,23 @@ export const fetchAllServices = async () => {
   return response.data;
 };
 
+export const createService = async (serviceData) => {
+  const response = await axios.post(`${API_ROOT}/service`, serviceData);
+  return response.data;
+};
+
+// Cập nhật dịch vụ theo ID
+export const updateService = async (serviceId, updatedData) => {
+  const response = await axios.put(`${API_ROOT}/service/${serviceId}`, updatedData);
+  return response.data;
+};
+
+// Xóa dịch vụ theo ID
+export const deleteService = async (serviceId) => {
+  const response = await axios.delete(`${API_ROOT}/service/${serviceId}`);
+  return response.data;
+};
+
 // Lấy tất cả hóa đơn
 export const fetchBills = async () => {
   const response = await axios.get(`${API_ROOT}/bills`);

@@ -186,12 +186,55 @@ export default function MapComponent() {
 
   return (
     <View style={styles.container}>
+      {/* Thanh tìm kiếm */}
+      <View style={styles.searchContainer}>
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Tìm kiếm địa điểm..."
+          value={searchQuery}
+          onChangeText={handleSearchChange}
+          onSubmitEditing={handleSearch}
+        />
+        <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
+          <Text style={styles.searchButtonText}>🔍</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Danh sách gợi ý */}
+      {showSuggestions && searchSuggestions.length > 0 && (
+        <View style={styles.suggestionsContainer}>
+          <FlatList
+            data={searchSuggestions}
+            keyExtractor={(item) => item.id.toString()}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={styles.suggestionItem}
+                onPress={() => handleSelectPlace(item)}
+              >
+                <Text style={styles.suggestionText}>{item.name}</Text>
+              </TouchableOpacity>
+            )}
+          />
+        </View>
+      )}
+
+      {/* Hiển thị đang tìm kiếm */}
+      {isSearching && searchQuery.length > 1 && (
+        <View style={styles.suggestionsContainer}>
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="small" color="gray" />
+            <Text style={styles.loadingText}>Đang tìm kiếm...</Text>
+          </View>
+        </View>
+      )}
+
       {errorMsg ? (
         <Text style={styles.error}>{errorMsg}</Text>
       ) : location ? (
         <MapView
           ref={mapRef}
           style={styles.map}
+          showsUserLocation={true}
           initialRegion={{
             latitude: location.latitude,
             longitude: location.longitude,
