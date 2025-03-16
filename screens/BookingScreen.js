@@ -16,6 +16,7 @@ import * as Location from "expo-location";
 import { API_ROOT } from "../utilities/constants";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 const BookingScreen = () => {
+  const [customerId, setCustomerId] = useState("");
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
@@ -47,10 +48,13 @@ const BookingScreen = () => {
     const getUserData = async () => {
       try {
         const userDataString = await AsyncStorage.getItem("userData");
+        console.log("checkdatabooing", userDataString);
+
         if (userDataString) {
           const parsedUserData = JSON.parse(userDataString);
 
           // Set user information from AsyncStorage to state
+          if (parsedUserData.userId) setCustomerId(parsedUserData.userId);
           if (parsedUserData.fullName) setCustomerName(parsedUserData.fullName);
           if (parsedUserData.phone) setCustomerPhone(parsedUserData.phone);
           if (parsedUserData.email) setCustomerEmail(parsedUserData.email);
@@ -271,6 +275,7 @@ const BookingScreen = () => {
       }
 
       const bookingData = {
+        customerId,
         customerName,
         customerPhone,
         customerEmail,
