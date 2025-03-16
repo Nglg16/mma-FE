@@ -23,7 +23,6 @@ const LoginForm = ({ navigation: propNavigation }) => {
   const [loading, setLoading] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userData, setUserData] = useState(null);
-  //   console.log("huhuhaha", userData);
 
   // Kiểm tra tài khoản đã đăng nhập
   useEffect(() => {
@@ -32,8 +31,8 @@ const LoginForm = ({ navigation: propNavigation }) => {
         const token = await AsyncStorage.getItem("userToken");
         const storedUserData = await AsyncStorage.getItem("userData");
 
-        console.log("Token từ AsyncStorage:", token);
-        console.log("Dữ liệu từ AsyncStorage:", storedUserData);
+        // console.log("Token từ AsyncStorage:", token);
+        // console.log("Dữ liệu từ AsyncStorage:", storedUserData);
 
         if (token && storedUserData) {
           setIsLoggedIn(true);
@@ -61,6 +60,7 @@ const LoginForm = ({ navigation: propNavigation }) => {
         email,
         password,
       });
+
       console.log("Dữ liệu từ API:", response.data);
 
       const { token } = response.data;
@@ -119,7 +119,7 @@ const LoginForm = ({ navigation: propNavigation }) => {
     setUserData(null);
     Alert.alert("Đăng xuất", "Bạn đã đăng xuất thành công!");
   };
-
+  const navigateBookingHis = () => {};
   return (
     <ImageBackground
       source={{
@@ -143,6 +143,28 @@ const LoginForm = ({ navigation: propNavigation }) => {
               : userData?.fullName || "Người dùng"}
             !
           </Text>
+          <TouchableOpacity
+            style={[
+              styles.loginButton,
+              {
+                backgroundColor: "#4CAF50",
+                borderRadius: 10,
+                padding: 12,
+                elevation: 5,
+              },
+            ]}
+            onPress={() => navigation.navigate("BookingHistoryScreen")}
+            activeOpacity={0.7}
+          >
+            <Text
+              style={[
+                styles.buttonText,
+                { color: "white", fontWeight: "bold", fontSize: 16 },
+              ]}
+            >
+              📅 Lịch sử đặt lịch
+            </Text>
+          </TouchableOpacity>
 
           <TouchableOpacity style={styles.loginButton} onPress={handleLogout}>
             <Text style={styles.buttonText}>ĐĂNG XUẤT</Text>

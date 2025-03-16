@@ -1,11 +1,27 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, FlatList, StyleSheet, ActivityIndicator, SafeAreaView, ScrollView, Alert } from "react-native";
-import { fetchBookings, updateBooking, fetchServiceByName, createBill, fetchAllServices, updateScheduleSlot } from "../../apis";
-import BookingCard from "./BookingCard"
+import {
+  View,
+  Text,
+  FlatList,
+  StyleSheet,
+  ActivityIndicator,
+  SafeAreaView,
+  ScrollView,
+  Alert,
+} from "react-native";
+import {
+  fetchBookings,
+  updateBooking,
+  fetchServiceByName,
+  createBill,
+  fetchAllServices,
+  updateScheduleSlot,
+} from "../../apis";
+import BookingCard from "./BookingCard";
 import BookingTable from "./BookingTable";
 import CancelModal from "./CancelModal";
 import BillModal from "./BillModal";
-import { useWindowDimensions } from 'react-native';
+import { useWindowDimensions } from "react-native";
 
 const BookingPage = () => {
   const [bookings, setBookings] = useState([]);
@@ -44,21 +60,25 @@ const BookingPage = () => {
         console.error("Lỗi khi lấy danh sách dịch vụ:", error);
       }
     };
-    
+
     loadAllServices();
   }, []);
 
   const handleUpdateStatus = async (booking, newStatus) => {
     try {
-      const updatedBooking = await updateBooking(booking._id, { status: newStatus });
-      setBookings((prev) => prev.map((b) => (b._id === booking._id ? updatedBooking : b)));
+      const updatedBooking = await updateBooking(booking._id, {
+        status: newStatus,
+      });
+      setBookings((prev) =>
+        prev.map((b) => (b._id === booking._id ? updatedBooking : b))
+      );
       const data = {
         date: booking.bookingDate.date,
         slot: booking.bookingDate.timeSlot,
         status: "Booked",
         bookingId: booking._id,
       };
-  
+
       await updateScheduleSlot(garageId, data);
     } catch (error) {
       console.error("Lỗi khi cập nhật booking:", error);
@@ -70,8 +90,10 @@ const BookingPage = () => {
     if (!selectedBooking || !cancelReason) return;
     try {
       // Tìm booking cần hủy
-      const bookingToCancel = bookings.find(b => b._id === selectedBooking._id);
-        
+      const bookingToCancel = bookings.find(
+        (b) => b._id === selectedBooking._id
+      );
+
       if (!bookingToCancel) {
         console.error("Lỗi: Không tìm thấy booking để hủy");
         return;
@@ -84,11 +106,17 @@ const BookingPage = () => {
       });
 
       // Cập nhật danh sách bookings trong state
-      setBookings((prev) => prev.map((b) => (b._id === selectedBooking._id ? updatedBooking : b)));
+      setBookings((prev) =>
+        prev.map((b) => (b._id === selectedBooking._id ? updatedBooking : b))
+      );
 
       // Kiểm tra nếu booking có trạng thái Confirmed hoặc Pending, cập nhật lịch
-      if ((bookingToCancel.status === "Confirmed" || bookingToCancel.status === "Pending") &&
-        bookingToCancel.bookingDate && bookingToCancel.bookingDate.date) {
+      if (
+        (bookingToCancel.status === "Confirmed" ||
+          bookingToCancel.status === "Pending") &&
+        bookingToCancel.bookingDate &&
+        bookingToCancel.bookingDate.date
+      ) {
         const slotData = {
           date: bookingToCancel.bookingDate.date,
           slot: bookingToCancel.bookingDate.timeSlot,
@@ -118,11 +146,11 @@ const BookingPage = () => {
           const service = await fetchServiceByName(serviceName);
           return {
             ...service,
-            quantity: 1
+            quantity: 1,
           };
         })
       );
-      
+
       setBillServices(serviceDetails);
       calculateTotal(serviceDetails);
       setShowBillModal(true);
@@ -134,7 +162,7 @@ const BookingPage = () => {
 
   const calculateTotal = (services) => {
     const total = services.reduce((sum, service) => {
-      return sum + (service.price * service.quantity);
+      return sum + service.price * service.quantity;
     }, 0);
     setTotalAmount(total);
   };
@@ -154,12 +182,14 @@ const BookingPage = () => {
 
   const handleAddService = (serviceId) => {
     if (!serviceId) return;
-    
-    const serviceToAdd = allServices.find(s => s._id === serviceId);
+
+    const serviceToAdd = allServices.find((s) => s._id === serviceId);
     if (serviceToAdd) {
       // Kiểm tra xem dịch vụ đã có trong bill chưa
-      const existingIndex = billServices.findIndex(s => s._id === serviceToAdd._id);
-      
+      const existingIndex = billServices.findIndex(
+        (s) => s._id === serviceToAdd._id
+      );
+
       if (existingIndex !== -1) {
         // Nếu đã có, tăng số lượng
         const updatedServices = [...billServices];
@@ -183,15 +213,15 @@ const BookingPage = () => {
         customerName: selectedBooking.customerName,
         customerPhone: selectedBooking.customerPhone,
         customerEmail: selectedBooking.customerEmail,
-        services: billServices.map(service => ({
+        services: billServices.map((service) => ({
           serviceId: service._id,
           name: service.name,
           price: service.price,
-          quantity: service.quantity
+          quantity: service.quantity,
         })),
         totalAmount: totalAmount,
         paymentStatus: "Unpaid",
-        garageId: garageId
+        garageId: garageId,
       };
 
       // Gọi API tạo hóa đơn
@@ -200,8 +230,12 @@ const BookingPage = () => {
       if (response) {
         Alert.alert("Thành công", "Tạo hóa đơn thành công!");
         // Cập nhật trạng thái booking thành "Billed"
-        const updatedBooking = await updateBooking(selectedBooking._id, { status: "Billed" });
-        setBookings((prev) => prev.map((b) => (b._id === selectedBooking._id ? updatedBooking : b)));
+        const updatedBooking = await updateBooking(selectedBooking._id, {
+          status: "Billed",
+        });
+        setBookings((prev) =>
+          prev.map((b) => (b._id === selectedBooking._id ? updatedBooking : b))
+        );
         setShowBillModal(false);
       }
     } catch (error) {
@@ -226,8 +260,8 @@ const BookingPage = () => {
       </View>
 
       {isTablet ? (
-        <BookingTable 
-          bookings={bookings} 
+        <BookingTable
+          bookings={bookings}
           handleUpdateStatus={handleUpdateStatus}
           prepareBill={prepareBill}
           openCancelModal={(booking) => {

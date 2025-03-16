@@ -18,10 +18,12 @@ import HomePage from "./screens/HomePage";
 import LoginScreen from "./Pages/Login/login";
 import RegisterForm from "./Pages/Register/register";
 import Icon from "react-native-vector-icons/FontAwesome";
-
 import Evaluate from "./components/Evaluates";
 
 // import AppHeader from "./components/AppHeader";
+
+import BookingHistoryList from "./Pages/BookingHis/BookingHistory";
+import BookingDetail from "./Pages/BookingDetail/BookingDetail";
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -83,8 +85,13 @@ function BookingHistoryScreen() {
     >
       <Stack.Screen
         name="BookingHistoryScreen"
-        component={BookingHistoryScreen}
+        component={BookingHistoryList}
         options={{ title: "Lịch sử đặt lịch", headerShown: false }}
+      />
+      <Stack.Screen
+        name="BookingDetail"
+        component={BookingDetail}
+        options={{ title: "Chi tiết lịch đặt", headerShown: false }}
       />
     </Stack.Navigator>
   );
@@ -104,6 +111,10 @@ function AuthStack() {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="LoginScreen" component={LoginScreen} />
       <Stack.Screen name="RegisterForm" component={RegisterForm} />
+      <Stack.Screen
+        name="BookingHistoryScreen"
+        component={BookingHistoryScreen}
+      />
     </Stack.Navigator>
   );
 }
