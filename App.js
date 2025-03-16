@@ -57,12 +57,28 @@ function GarageStack() {
     </Stack.Navigator>
   );
 }
+function BookingHistoryScreen() {
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerStyle: { backgroundColor: "#6200ea" },
+        headerTintColor: "#fff",
+      }}
+    >
+      <Stack.Screen
+        name="BookingHistoryScreen"
+        component={BookingHistoryScreen}
+        options={{ title: "Lịch sử đặt lịch", headerShown: false }}
+      />
+    </Stack.Navigator>
+  );
+}
 
 function HomeScreen() {
   return (
-    <View style={{ flex: 1 }}> 
-    <Header title="Trang chủ" />
-  </View>
+    <View style={{ flex: 1 }}>
+      <Header title="Trang chủ" />
+    </View>
   );
 }
 

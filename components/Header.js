@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigation } from "@react-navigation/native";
 import {
   View,
   Text,
@@ -11,7 +12,7 @@ import { FontAwesome } from "@expo/vector-icons";
 
 export default function Header({ title }) {
   const [visible, setVisible] = useState(false);
-
+  const navigation = useNavigation();
   return (
     <Provider>
       {" "}
@@ -30,7 +31,7 @@ export default function Header({ title }) {
           contentStyle={styles.menu}
         >
           <Menu.Item
-            onPress={() => alert("Lịch sử đặt lịch")}
+            onPress={() => navigation.navigate("BookingHistory")}
             title="Lịch sử đặt lịch"
           />
           <Divider />
