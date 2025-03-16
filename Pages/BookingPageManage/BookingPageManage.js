@@ -52,14 +52,14 @@ const BookingPage = () => {
     try {
       const updatedBooking = await updateBooking(booking._id, { status: newStatus });
       setBookings((prev) => prev.map((b) => (b._id === booking._id ? updatedBooking : b)));
-      const data = {
-        date: booking.bookingDate.date,
-        slot: booking.bookingDate.timeSlot,
-        status: "Booked",
-        bookingId: booking._id,
-      };
+      // const data = {
+      //   date: booking.bookingDate.date,
+      //   slot: booking.bookingDate.timeSlot,
+      //   status: "Booked",
+      //   bookingId: booking._id,
+      // };
   
-      await updateScheduleSlot(garageId, data);
+      // await updateScheduleSlot(garageId, data);
     } catch (error) {
       console.error("Lỗi khi cập nhật booking:", error);
       Alert.alert("Lỗi", "Không thể cập nhật trạng thái");
