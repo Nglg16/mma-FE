@@ -143,28 +143,30 @@ const LoginForm = ({ navigation: propNavigation }) => {
               : userData?.fullName || "Người dùng"}
             !
           </Text>
-          <TouchableOpacity
-            style={[
-              styles.loginButton,
-              {
-                backgroundColor: "#4CAF50",
-                borderRadius: 10,
-                padding: 12,
-                elevation: 5,
-              },
-            ]}
-            onPress={() => navigation.navigate("BookingHistoryScreen")}
-            activeOpacity={0.7}
-          >
-            <Text
+          {AsyncStorage.getItem("userData").role === "user" && (
+            <TouchableOpacity
               style={[
-                styles.buttonText,
-                { color: "white", fontWeight: "bold", fontSize: 16 },
+                styles.loginButton,
+                {
+                  backgroundColor: "#4CAF50",
+                  borderRadius: 10,
+                  padding: 12,
+                  elevation: 5,
+                },
               ]}
+              onPress={() => navigation.navigate("BookingHistoryScreen")}
+              activeOpacity={0.7}
             >
-              📅 Lịch sử đặt lịch
-            </Text>
-          </TouchableOpacity>
+              <Text
+                style={[
+                  styles.buttonText,
+                  { color: "white", fontWeight: "bold", fontSize: 16 },
+                ]}
+              >
+                📅 Lịch sử đặt lịch
+              </Text>
+            </TouchableOpacity>
+          )}
 
           <TouchableOpacity style={styles.loginButton} onPress={handleLogout}>
             <Text style={styles.buttonText}>ĐĂNG XUẤT</Text>
