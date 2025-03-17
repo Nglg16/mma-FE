@@ -189,14 +189,16 @@ export default function App() {
           headerShown: false,
         })}
       >
-        <Tab.Screen
-          name="Home"
-          component={HomeStack}
-          options={{
-            title: "Trang chủ",
-            headerShown: false,
-          }}
-        />
+        {userRole !== "admin" && (
+          <Tab.Screen
+            name="Home"
+            component={HomeStack}
+            options={{
+              title: "Trang chủ",
+              headerShown: false,
+            }}
+          />
+        )}
 
         {/* Chỉ hiển thị tab Đặt lịch khi không phải admin */}
         {userRole !== "admin" && (

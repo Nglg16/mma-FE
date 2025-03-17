@@ -72,14 +72,14 @@ const BookingPage = () => {
       setBookings((prev) =>
         prev.map((b) => (b._id === booking._id ? updatedBooking : b))
       );
-      const data = {
-        date: booking.bookingDate.date,
-        slot: booking.bookingDate.timeSlot,
-        status: "Booked",
-        bookingId: booking._id,
-      };
+      // const data = {
+      //   date: booking.bookingDate.date,
+      //   slot: booking.bookingDate.timeSlot,
+      //   status: "Booked",
+      //   bookingId: booking._id,
+      // };
 
-      await updateScheduleSlot(garageId, data);
+      // await updateScheduleSlot(garageId, data);
     } catch (error) {
       console.error("Lỗi khi cập nhật booking:", error);
       Alert.alert("Lỗi", "Không thể cập nhật trạng thái");
@@ -111,21 +111,21 @@ const BookingPage = () => {
       );
 
       // Kiểm tra nếu booking có trạng thái Confirmed hoặc Pending, cập nhật lịch
-      if (
-        (bookingToCancel.status === "Confirmed" ||
-          bookingToCancel.status === "Pending") &&
-        bookingToCancel.bookingDate &&
-        bookingToCancel.bookingDate.date
-      ) {
-        const slotData = {
-          date: bookingToCancel.bookingDate.date,
-          slot: bookingToCancel.bookingDate.timeSlot,
-          status: "Available",
-          bookingId: null,
-        };
+      // if (
+      //   (bookingToCancel.status === "Confirmed" ||
+      //     bookingToCancel.status === "Pending") &&
+      //   bookingToCancel.bookingDate &&
+      //   bookingToCancel.bookingDate.date
+      // ) {
+      //   const slotData = {
+      //     date: bookingToCancel.bookingDate.date,
+      //     slot: bookingToCancel.bookingDate.timeSlot,
+      //     status: "Available",
+      //     bookingId: null,
+      //   };
 
-        await updateScheduleSlot(garageId, slotData);
-      }
+      //   await updateScheduleSlot(garageId, slotData);
+      // }
 
       // Reset state sau khi hủy
       setSelectedBooking(null);

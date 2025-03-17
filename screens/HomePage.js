@@ -279,8 +279,11 @@ const HomePage = ({ navigation }) => {
           </View>
 
           <View style={styles.garagesContainer}>
-            {garages.map((garage) => (
-              <TouchableOpacity key={garage.id} style={styles.garageCard}>
+            {garages.map((garage, index) => (
+              <TouchableOpacity
+                key={garage.id || `garage-${index}`}
+                style={styles.garageCard}
+              >
                 <Image
                   source={{
                     uri: garage.image || "https://via.placeholder.com/150x100",
